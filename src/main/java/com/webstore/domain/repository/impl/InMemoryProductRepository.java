@@ -2,7 +2,10 @@ package com.webstore.domain.repository.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Repository;
 import com.webstore.domain.Product;
@@ -66,6 +69,52 @@ public class InMemoryProductRepository implements ProductRepository {
 		}
 
 		return productById;
+	}
+
+	/**
+	 * @param category
+	 * @return productsByCategory
+	 */
+	@Override
+	public List<Product> getProductsByCategory(String category) {
+		// TODO Auto-generated method stub
+		List<Product> productsByCategory = new ArrayList<Product>();
+
+		for (Product product : listOfProducts) {
+			if (category.equalsIgnoreCase(product.getCategory())) {
+				productsByCategory.add(product);
+			}
+		}
+
+		return productsByCategory;
+	}
+
+	@Override
+	public Set<Product> getProductsByFilter(Map<String, List<String>> filterParams) {
+		// TODO Auto-generated method stub
+		Set<Product> productByBrand = new HashSet<Product>();
+		Set<Product> productsByCategory = new HashSet<Product>();
+
+		Set<String> criterias = filterParams.keySet();
+
+		if (criterias.contains("brand")) {
+			for (String brandName : filterParams.get("brand")) {
+				for (Product product : listOfProducts) {
+					if (brandName.equalsIgnoreCase(product.getManufacturer())) {
+						productByBrand.add(product);
+					}
+				}
+			}
+		}
+
+		if (criterias.contains("category")) {
+			for (String category : filterParams.get("category")) {
+				productsByCategory.addAll(this.getProductsByCategory(category));
+			}
+		}
+
+		productsByCategory.retainAll(productByBrand);
+		return productsByCategory;
 	}
 
 }
